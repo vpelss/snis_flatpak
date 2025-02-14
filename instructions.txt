@@ -1,0 +1,78 @@
+# These are my instructions for building a flatpak of:
+# https://smcameron.github.io/space-nerds-in-space/
+# I built it on Windows using Ubuntu WSL Linux for Windows. 
+#Note: snis_launcher must be run while in Active Working Directory and now looks for binaries in ./bin
+
+# Setting up up the build environment:
+
+sudo apt install git make gcc
+sudo apt install flatpak
+sudo apt install flatpak-builder
+flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+# Create manifest file  yaml file io.github.vpelss.snis_flatpak.yml:
+# https://github.com/vpelss/snis_flatpak/blob/main/io.github.vpelss.snis_flatpak.yml
+
+#shared modules this MUSt be build in a subdirectory where your manifest file resides
+git clone https://github.com/flathub/shared-modules
+cd shared-modules
+git submodule add https://github.com/flathub/shared-modules.git
+
+**************************
+
+# Build the flatpak:
+
+# My paths are the following. 
+#  /home/adsiltia/.flatpak-builder : where the modules are built
+# ~/builddir : build directory
+# ~/snis_flatpak : git cloned manifest 
+# /home/adsiltia/snis_flatpak/repo : repo files
+
+#note: This installs locally because of --install : it does overwrite if previously installed
+
+flatpak-builder --user --force-clean --install-deps-from=flathub --repo=/home/adsiltia/repo --state-dir=/home/adsiltia/.flatpak-builder --install ~/builddir  ~/io.github.smcameron.space-nerds-in-space.yml
+
+#run it
+flatpak run io.github.smcameron.space-nerds-in-space
+
+#To run a flatpak environment and go to terminal (for troubleshooting):
+flatpak run --allow=devel --command=bash io.github.vpelss.snis_flatpak
+#or
+flatpak run -d --command=bash io.github.vpelss.snis_flatpak
+#Note: You can run and try different permissions from command line:
+flatpak run -d --socket=fallback-x11 --command=bash io.github.vpelss.snis_flatpak
+
+#remote install from my git : I NO LONGER HOST THIS REPO
+sudo flatpak --no-gpg-verify remote-add snisRemote https://vpelss.github.io/snis_flatpak/repo
+sudo flatpak install -v https://vpelss.github.io/snis_flatpak/io.github.smcameron.space-nerds-in-space.flatpakref
+flatpak run io.github.vpelss.snis_flatpak
+
+# How to test the repository and install locally:
+# Add local repo path to flatpak remotes (not gpg signed):
+sudo flatpak --no-gpg-verify remote-add snis_local ~/snis_flatpak/repo
+# Then install from local repo using remote:
+sudo flatpak install snis_local io.github.smcameron.space-nerds-in-space
+
+# THIS NO LONGER WORKS AS I DONT HOST  REPO ANY MORE
+Create io.github.smcameron.space-nerds-in-space.flatpakref if you want a one line install.
+See: https://github.com/vpelss/snis_flatpak/blob/main/io.github.smcameron.space-nerds-in-space.flatpakref
+# Important Note: no trailing line spaces are allowed in io.github.smcameron.space-nerds-in-space.flatpakref (why?) or the following will fail:
+sudo flatpak install -v https://vpelss.github.io/snis_flatpak/io.github.smcameron.space-nerds-in-space.flatpakref
+
+
+#Ways to Distribute:
+
+#1. Create a single file to distribute. Copy and install locally:
+mkdir ~/bridgecommand_flatpak/bundle/
+sudo flatpak build-bundle ~/snis_flatpak/repo snis.flatpak io.github.smcameron.space-nerds-in-space
+
+#Test install after download:
+sudo flatpak install --bundle io.github.smcameron.space-nerds-in-space
+
+To host on github as a flatpak remote repository:
+
+# I NO LONGER HOST THIS REPO
+#You must turn on Actions->Deployments->Github Pages to make github act like a web host server. eg: https://vpelss.github.io/snis_flatpak
+flatpak --no-gpg-verify remote-add --user snisRemote https://vpelss.github.io/snis_flatpak/repo
+flatpak install --user snisRemote io.github.vpelss.snis_flatpak
+#Or for a one line install, as I have copied io.github.vpelss.snis_flatpak.flatpakref there:
+flatpak install --user -v https://vpelss.github.io/snis_flatpak/io.github.vpelss.snis_flatpak.flatpakref

@@ -1,0 +1,8 @@
+[Flatpak Ref]
+Title=Space Nerds in Space
+Name=io.github.smcameron.space-nerds-in-space
+Branch=master
+Url=https://vpelss.github.io/snis_flatpak/repo
+SuggestRemoteName=io.github.smcameron.space-nerds-in-space
+RuntimeRepo=https://dl.flathub.org/repo/flathub.flatpakrepo
+IsRuntime=false
