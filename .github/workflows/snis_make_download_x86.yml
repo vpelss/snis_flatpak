@@ -1,0 +1,42 @@
+on: workflow_dispatch
+
+name: SNIS_make_download_x86
+jobs:
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-latest
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-44
+      options: --privileged
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: prep
+      run: |
+        git config --global --add safe.directory /__w/snis_flatpak/snis_flatpak
+        git submodule add https://github.com/flathub/shared-modules.git
+    
+    - uses: jochumdev/flatpak-github-actions/flatpak-builder@builder-update-deps
+    #- uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      with:
+        bundle: io.github.smcameron.space-nerds-in-space
+        manifest-path: io.github.smcameron.space-nerds-in-space.yml
+        cache-key: flatpak-builder-${{ github.sha }}
+        upload-artifact: "false"
+        arch: x86_64
+      
+    - name: See
+      run: |   
+        ls -l
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: io.github.smcameron.space-nerds-in-space
+        path: io.github.smcameron.space-nerds-in-space
+ 
+    - name: upload binaries to release
+      uses: softprops/action-gh-release@v2
+      with:
+          tag_name: "try_me"
+          files: io.github.smcameron.space-nerds-in-space
