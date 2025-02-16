@@ -1,5 +1,5 @@
 on: workflow_dispatch
-name: SNIS_make_repo_x86
+name: DO NOT USE SNIS_make_repo_x86
 jobs:
   flatpak:
     name: "Flatpak"
