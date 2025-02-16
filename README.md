@@ -19,7 +19,7 @@ Then download the bundle: https://github.com/vpelss/snis_flatpak/releases/tag/Do
 Then Install from a terminal. (you may need to run prefix sudo)
 
 ```
-flatpak install --bundle io.github.smcameron.space-nerds-in-space.x86_64
+flatpak install --user --bundle io.github.smcameron.space-nerds-in-space.x86_64
 
 ```
 
