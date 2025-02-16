@@ -57,5 +57,5 @@ jobs:
     - name: upload binaries to release
       uses: softprops/action-gh-release@v2
       with:
-          tag_name: "try_me"
+          tag_name: "Download"
           files: io.github.smcameron.space-nerds-in-space.${{ matrix.arch }}
