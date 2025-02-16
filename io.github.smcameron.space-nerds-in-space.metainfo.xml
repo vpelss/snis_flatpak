@@ -33,7 +33,7 @@
       Note that unlike other fine bridge simulators, Space Nerds In Space is fully 3D.
     </p>
     <p>Space Nerds In Space also has an option where someone can take the role of dungeon master and modify the game universe in progress.</p>
-    <p>There are warp gates, nebula that block sensors and allow you to hide, mining, courier missions, and of course many hostiles. Creating your own scriptable missions in lua is possible and encoraged. And much, much more.</p>
+    <p>There are warp gates, nebula that block sensors and allow you to hide, mining, courier missions, and of course many hostiles. Creating your own scriptable missions in lua is possible and encouraged. And much, much more.</p>
   </description>
   
   <launchable type="desktop-id">io.github.smcameron.space-nerds-in-space.desktop</launchable>
