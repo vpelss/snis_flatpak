@@ -33,7 +33,6 @@ modules:
       - install -Dm0644 ${FLATPAK_ID}.metainfo.xml "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml"
       - install -Dm0644 ${FLATPAK_ID}.desktop "${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop"
       - mkdir -p ${FLATPAK_DEST}/share/snis
-      #- mv share ${FLATPAK_DEST}
       - cp -R share/snis ${FLATPAK_DEST}/share
     sources:
       - type: git
