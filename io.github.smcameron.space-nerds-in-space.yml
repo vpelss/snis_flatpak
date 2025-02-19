@@ -2,7 +2,7 @@ id: io.github.smcameron.space-nerds-in-space
 runtime: org.freedesktop.Platform 
 runtime-version: "24.08"
 sdk: org.freedesktop.Sdk 
-command: snis.sh
+command: snis_client
 
 finish-args:
   - --socket=x11
@@ -15,6 +15,7 @@ modules:
 
   - name: portaudio
     buildsystem: cmake-ninja
+    build-commands: 
     sources:
       - type: git
         url: https://github.com/PortAudio/portaudio.git
@@ -24,29 +25,34 @@ modules:
   - shared-modules/glu/glu-9.json
   - shared-modules/glew/glew.json
 
-  - name: snis
-    buildsystem: simple
-    build-commands: 
-      - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes
-      - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
-      - mv ${FLATPAK_DEST}/bin/snis_launcher ${FLATPAK_DEST}/snis_launcher
-    sources:
-      - type: git
-        url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: 56b6357a493ea8c8ab01cff1ce472b76d7e71b6d
-      - type: script
-        dest-filename: snis.sh
-        commands:
-          - cd /app 
-          - exec ./snis_launcher
-
-  - name: goodies
+  # author is adverse to hosting binaries on git. so I host them
+  - name: assets_not_hosted 
     buildsystem: simple
     build-commands:
       - install -Dm0644 logo.svg "${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
       - install -Dm0644 ${FLATPAK_ID}.metainfo.xml "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml"
       - install -Dm0644 ${FLATPAK_ID}.desktop "${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop"
+      - mkdir -p ${FLATPAK_DEST}/share/snis
+      #- mv share ${FLATPAK_DEST}
+      - cp -R share/snis ${FLATPAK_DEST}/share
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: ba46d58d5d6417c2bf627d45436290dfb46da641
+        commit: main
+
+  - name: snis
+    buildsystem: simple
+    build-commands: 
+      - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes
+      - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
+      - mv ${FLATPAK_DEST}/bin/snis_launcher ${FLATPAK_DEST}
+    sources:
+      - type: git
+        url: https://github.com/smcameron/space-nerds-in-space.git
+        commit: 93958995098d918e5aad557182f3e5c3fd26f210
+      - type: script
+        dest-filename: snis.sh
+        commands:
+          - cd /app
+          - exec ./bin/snis_client
+
