@@ -2,7 +2,7 @@ id: io.github.smcameron.space-nerds-in-space
 runtime: org.freedesktop.Platform 
 runtime-version: "24.08"
 sdk: org.freedesktop.Sdk 
-command: snis_client
+command: snis.sh
 
 finish-args:
   - --socket=x11
@@ -49,10 +49,10 @@ modules:
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: 93958995098d918e5aad557182f3e5c3fd26f210
+        commit: master
       - type: script
         dest-filename: snis.sh
         commands:
           - cd /app
-          - exec ./bin/snis_client
+          - exec ./bin/snis_client --auto-download-assets
 
