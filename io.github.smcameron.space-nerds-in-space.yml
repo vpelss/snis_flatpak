@@ -43,12 +43,12 @@ modules:
     buildsystem: simple
     build-commands: 
       - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes
-      - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
-      - mv ${FLATPAK_DEST}/bin/snis_launcher ${FLATPAK_DEST}
+      - install -Dm755 snis.sh ${FLATPAK_DEST}/snis.sh
+      #- mv ${FLATPAK_DEST}/bin/snis_launcher ${FLATPAK_DEST}
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: master
+        commit: e9f614dd4aa1cef9922c64c6af4e168eb3235374
       - type: script
         dest-filename: snis.sh
         commands:
