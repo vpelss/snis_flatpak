@@ -37,7 +37,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: main
+        commit: f11f260c381875402dd44e967aa03fc0bc66a6f7
 
   - name: snis
     buildsystem: simple
