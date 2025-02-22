@@ -25,13 +25,10 @@ modules:
   - shared-modules/glu/glu-9.json
   - shared-modules/glew/glew.json
 
-  # author is adverse to hosting binaries on git. so I host them
+  # author is reluctant to host asset binaries on git. so I host them
   - name: assets_not_hosted 
     buildsystem: simple
     build-commands:
-      - install -Dm0644 logo.svg "${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
-      - install -Dm0644 ${FLATPAK_ID}.metainfo.xml "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml"
-      - install -Dm0644 ${FLATPAK_ID}.desktop "${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop"
       - mkdir -p ${FLATPAK_DEST}/share/snis
       - cp -R share/snis ${FLATPAK_DEST}/share
     sources:
@@ -43,14 +40,17 @@ modules:
     buildsystem: simple
     build-commands: 
       - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
+      - install -Dm0644 share/applications/${FLATPAK_ID}.svg "${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
+      - install -Dm0644 share/metainfo/${FLATPAK_ID}.metainfo.xml "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml"
+      - install -Dm0644 share/applications/${FLATPAK_ID}.desktop "${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop"
       - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: 4c6c159cb5fea26744f3af0db3e2da98da1700f4
+        commit: d2eb0653c44d55be739f806adccfeaa63bb86d09
       - type: script
         dest-filename: snis.sh
         commands:
           - cd /app
-          - exec ./bin/snis_client --auto-download-assets
+          - exec ./bin/snis_client --fullscreen --auto-download-assets
 
