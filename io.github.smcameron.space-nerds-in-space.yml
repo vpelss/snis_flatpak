@@ -42,7 +42,7 @@ modules:
   - name: snis
     buildsystem: simple
     build-commands: 
-      - make O=0 install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
+      - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
       - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
     sources:
       - type: git
