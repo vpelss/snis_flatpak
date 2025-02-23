@@ -34,7 +34,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: f11f260c381875402dd44e967aa03fc0bc66a6f7
+        commit: main
 
   - name: snis
     buildsystem: simple
@@ -52,5 +52,6 @@ modules:
         dest-filename: snis.sh
         commands:
           - cd /app
+          - exec export SNIS_SERVER_PORT_RANGE=32000:32100
           - exec ./bin/snis_client --fullscreen --auto-download-assets
 
