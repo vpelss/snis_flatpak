@@ -52,6 +52,6 @@ modules:
         dest-filename: snis.sh
         commands:
           - cd /app
-          - exec export SNIS_SERVER_PORT_RANGE=32000:32100
+          - export SNIS_SERVER_PORT_RANGE=32000:32100
           - exec ./bin/snis_client --fullscreen --auto-download-assets
 
