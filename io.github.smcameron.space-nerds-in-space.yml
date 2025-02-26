@@ -25,7 +25,7 @@ modules:
   - shared-modules/glu/glu-9.json
   - shared-modules/glew/glew.json
 
-  # author is reluctant to host asset binaries on git. so I host them
+  # author is reluctant to host asset binaries on git. so I host them. This also removes the need to download assets on the first run. This is a must.
   - name: assets_not_hosted 
     buildsystem: simple
     build-commands:
@@ -34,7 +34,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: main
+        commit: f11f260c381875402dd44e967aa03fc0bc66a6f7
 
   - name: snis
     buildsystem: simple
@@ -47,11 +47,11 @@ modules:
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: d2eb0653c44d55be739f806adccfeaa63bb86d09
+        commit: 80feda58b20c4a6b9ba894689205066327ad24db
       - type: script
         dest-filename: snis.sh
         commands:
           - cd /app
-          - export SNIS_SERVER_PORT_RANGE=32000:32100
+          #- export SNIS_SERVER_PORT_RANGE='32000:32100'
           - exec ./bin/snis_client --fullscreen --auto-download-assets
 
