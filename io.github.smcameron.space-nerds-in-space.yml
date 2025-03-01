@@ -12,22 +12,22 @@ finish-args:
   - --socket=pulseaudio
 
 cleanup:
-  - ${FLATPAK_DEST}/patches
+  - '/patches'
  
 modules:
 
-  # author is prefers not to host asset binaries on git. So I host them. 
-  #This removes the need to download many assets on the first run. 
+  # author prefers not to host asset binaries on git. So I host them. 
+  #This module removes the need to download many assets on the first run. 
   - name: assets_not_hosted 
     buildsystem: simple
     build-commands:
-      - mkdir -p ${FLATPAK_DEST}/share/snis
+      #- mkdir -p ${FLATPAK_DEST}/share/snis
       - cp -R share/snis ${FLATPAK_DEST}/share
       - cp -R patches ${FLATPAK_DEST}
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: main
+        commit: aa8785b1165aa6feb164b140c235d9ba1832278f
 
   - name: portaudio
     buildsystem: cmake-ninja
@@ -41,10 +41,10 @@ modules:
     buildsystem: simple
     build-commands: 
       - mkdir -p ${FLATPAK_DEST}/bin
-      - ./autogen.sh
-      - ./configure --prefix=${FLATPAK_DEST}
-      - make
-      - make install
+      #- ./autogen.sh
+      #- ./configure --prefix=${FLATPAK_DEST}
+      #- make
+      #- make install
     sources:
       - type: git
         url: https://github.com/espeak-ng/espeak-ng.git
@@ -113,16 +113,9 @@ modules:
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: 80feda58b20c4a6b9ba894689205066327ad24db
+        commit: 30e9c5ddada66004ed901d04c5459c7275d11ca4
       - type: script
         dest-filename: snis.sh
         commands:
-          - cd /app
-          - PATH=/app/bin:$PATH
-          #- LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/lib64
-          #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/lib64
-          #- alias espeak='espeak -vf3'
-          - alias espeak='./nanotts -p -i'
-          - exec ./bin/snis_client --fullscreen --auto-download-assets
-          # SHUT DOWN SERVERS ???
-
+          - cd /app/bin
+          - exec ./snis_client --fullscreen --auto-download-assets
