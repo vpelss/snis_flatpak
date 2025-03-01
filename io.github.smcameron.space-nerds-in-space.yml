@@ -10,8 +10,24 @@ finish-args:
   - --device=dri
   - --share=network
   - --socket=pulseaudio
+
+cleanup:
+  - ${FLATPAK_DEST}/patches
  
 modules:
+
+  # author is prefers not to host asset binaries on git. So I host them. 
+  #This removes the need to download many assets on the first run. 
+  - name: assets_not_hosted 
+    buildsystem: simple
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/share/snis
+      - cp -R share/snis ${FLATPAK_DEST}/share
+      - cp -R patches ${FLATPAK_DEST}
+    sources:
+      - type: git
+        url: https://github.com/vpelss/snis_flatpak.git
+        commit: main
 
   - name: portaudio
     buildsystem: cmake-ninja
@@ -21,20 +37,70 @@ modules:
         url: https://github.com/PortAudio/portaudio.git
         commit: 242a0241f69bd359b692004f3974ce39ec5137fd #Aug 11, 2021
 
+  - name: espeak
+    buildsystem: simple
+    build-commands: 
+      - mkdir -p ${FLATPAK_DEST}/bin
+      - ./autogen.sh
+      - ./configure --prefix=${FLATPAK_DEST}
+      - make
+      - make install
+    sources:
+      - type: git
+        url: https://github.com/espeak-ng/espeak-ng.git
+        commit: 034807a91dc2abb86ed2012121ca8dbc691dcdb4
+
+# no lang files?
+  #- name: svox-pico
+    #buildsystem: simple
+    #build-commands: 
+      #- mkdir -p ${FLATPAK_DEST}/bin
+      #- meson setup --prefix=${FLATPAK_DEST} builddir
+      #- cd builddir; ninja; ninja install;
+      #- crashme
+    #sources:
+      #- type: git
+        #url: https://github.com/jpwhiting/svox-pico.git
+        #commit: 422a3bb69d5f49f9f791b73d72ea7d8aff78d150
+
+  #- name: pcaudiolib 
+    #buildsystem: simple
+    #build-commands: 
+      #- mkdir -p ${FLATPAK_DEST}/bin
+      #- ./autogen.sh
+      #- ./configure --prefix=${FLATPAK_DEST}
+      #- make
+      #- make install
+    #sources:
+      #- type: git
+        #url: https://github.com/espeak-ng/pcaudiolib.git
+        #commit: e907571bad7dee296fb56a409a0f7c5a0c57d38a
+
+  #- name: popt
+    #buildsystem: cmake
+    #build-commands: 
+    #sources:
+      #- type: git
+        #url: https://github.com/rpm-software-management/popt.git
+        #commit: 63f096798125e96a0125faa477350f61901f3570
+
+  - name: nanotts_pico2wav
+    buildsystem: simple
+    build-commands: 
+      - patch svoxpico/picoapi.c  -i ${FLATPAK_DEST}/patches/picoapi_patch.txt 
+      - mkdir -p ${FLATPAK_DEST}/bin/lang
+      - cd svoxpico; ./autogen.sh && ./configure --host `uname -m` && make -j 
+      - make
+      -  install -Dm755 nanotts ${FLATPAK_DEST}/bin/nanotts
+      - cp -R lang ${FLATPAK_DEST}/bin
+    sources:
+      - type: git
+        url: https://github.com/gmn/nanotts.git
+        commit: d8b91f3d9d524c30f6fe8098ea7a0a638c889cf9
+
   - shared-modules/lua5.3/lua-5.3.5.json
   - shared-modules/glu/glu-9.json
   - shared-modules/glew/glew.json
-
-  # author is reluctant to host asset binaries on git. so I host them. This also removes the need to download assets on the first run. This is a must.
-  - name: assets_not_hosted 
-    buildsystem: simple
-    build-commands:
-      - mkdir -p ${FLATPAK_DEST}/share/snis
-      - cp -R share/snis ${FLATPAK_DEST}/share
-    sources:
-      - type: git
-        url: https://github.com/vpelss/snis_flatpak.git
-        commit: f11f260c381875402dd44e967aa03fc0bc66a6f7
 
   - name: snis
     buildsystem: simple
@@ -52,6 +118,11 @@ modules:
         dest-filename: snis.sh
         commands:
           - cd /app
-          #- export SNIS_SERVER_PORT_RANGE='32000:32100'
+          - PATH=/app/bin:$PATH
+          #- LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/lib64
+          #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/app/lib64
+          #- alias espeak='espeak -vf3'
+          - alias espeak='./nanotts -p -i'
           - exec ./bin/snis_client --fullscreen --auto-download-assets
+          # SHUT DOWN SERVERS ???
 
