@@ -27,7 +27,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: 145a077f4ecdeb7c36ff84b9b93bf76c7301ac5d
+        commit: aa8785b1165aa6feb164b140c235d9ba1832278f
 
   - name: portaudio
     buildsystem: cmake-ninja
@@ -113,7 +113,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: 30e9c5ddada66004ed901d04c5459c7275d11ca4
+        commit: a0bd34382e6fdaab9a3e3542807066f3b0830dcf
       - type: script
         dest-filename: snis.sh
         commands:
