@@ -21,8 +21,7 @@ modules:
   - name: assets_not_hosted 
     buildsystem: simple
     build-commands:
-      #- mkdir -p ${FLATPAK_DEST}/share/snis
-      - cp -R share/snis ${FLATPAK_DEST}/share
+      - cp -R share ${FLATPAK_DEST}/share
       - cp -R patches ${FLATPAK_DEST}
     sources:
       - type: git
@@ -36,53 +35,6 @@ modules:
       - type: git
         url: https://github.com/PortAudio/portaudio.git
         commit: 242a0241f69bd359b692004f3974ce39ec5137fd #Aug 11, 2021
-
-  - name: espeak
-    buildsystem: simple
-    build-commands: 
-      - mkdir -p ${FLATPAK_DEST}/bin
-      #- ./autogen.sh
-      #- ./configure --prefix=${FLATPAK_DEST}
-      #- make
-      #- make install
-    sources:
-      - type: git
-        url: https://github.com/espeak-ng/espeak-ng.git
-        commit: 034807a91dc2abb86ed2012121ca8dbc691dcdb4
-
-# no lang files?
-  #- name: svox-pico
-    #buildsystem: simple
-    #build-commands: 
-      #- mkdir -p ${FLATPAK_DEST}/bin
-      #- meson setup --prefix=${FLATPAK_DEST} builddir
-      #- cd builddir; ninja; ninja install;
-      #- crashme
-    #sources:
-      #- type: git
-        #url: https://github.com/jpwhiting/svox-pico.git
-        #commit: 422a3bb69d5f49f9f791b73d72ea7d8aff78d150
-
-  #- name: pcaudiolib 
-    #buildsystem: simple
-    #build-commands: 
-      #- mkdir -p ${FLATPAK_DEST}/bin
-      #- ./autogen.sh
-      #- ./configure --prefix=${FLATPAK_DEST}
-      #- make
-      #- make install
-    #sources:
-      #- type: git
-        #url: https://github.com/espeak-ng/pcaudiolib.git
-        #commit: e907571bad7dee296fb56a409a0f7c5a0c57d38a
-
-  #- name: popt
-    #buildsystem: cmake
-    #build-commands: 
-    #sources:
-      #- type: git
-        #url: https://github.com/rpm-software-management/popt.git
-        #commit: 63f096798125e96a0125faa477350f61901f3570
 
   - name: nanotts_pico2wav
     buildsystem: simple
