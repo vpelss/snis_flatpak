@@ -65,7 +65,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: a0bd34382e6fdaab9a3e3542807066f3b0830dcf
+        commit: 23cea40e9bb77932e0f66ed2fbf3f7b9a6cb30f1
       - type: script
         dest-filename: snis.sh
         commands:
