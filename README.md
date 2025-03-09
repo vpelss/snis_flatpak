@@ -8,9 +8,18 @@ https://smcameron.github.io/space-nerds-in-space/
 
 Or:
 
-# Install with flatpak
+# Insatll from Flathub
 
-We are planning to have it show on flatub. Until that is accomplished:
+If your distro does not already have flatpak installed, install flatpak for your linux distro as per: https://flatpak.org/setup/
+
+https://flathub.org/apps/io.github.smcameron.space-nerds-in-space
+
+```
+flatpak install flathub io.github.smcameron.space-nerds-in-space
+flatpak run io.github.smcameron.space-nerds-in-space
+```
+
+# Install with flatpak manually
 
 If your distro does not already have flatpak installed, install flatpak for your linux distro as per: https://flatpak.org/setup/
 
