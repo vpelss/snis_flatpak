@@ -274,3 +274,12 @@ noise with a high pass filter).
 missile_launch.ogg
 COPYRIGHT=2018 by Stephen M. Cameron
 LICENSE=Creative Commons Attribution-Share Alike 3.0 License  http://creativecommons.org/licenses/by-sa/3.0/
+
+photon-torpedo-fire.ogg
+Copyright newlocknew 2019
+NAME="blaster hit 1(Sytrus,rsmpl,multiprcsng)single.wav"
+SOURCE=https://freesound.org/people/newlocknew/sounds/514022/
+AUTHOR=https://freesound.org/people/newlocknew
+LICENSE=https://creativecommons.org/licenses/by/4.0/
+NOTES="resampled from 44100 stereo wav to 48000 mono ogg vorbis"
+
