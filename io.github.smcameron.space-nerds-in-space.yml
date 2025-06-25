@@ -26,7 +26,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: aa8785b1165aa6feb164b140c235d9ba1832278f
+        commit: 3bb2936da03097a5ef8769f1819d8cbe92f140f4
 
   - name: portaudio
     buildsystem: cmake-ninja
@@ -59,13 +59,13 @@ modules:
     build-commands: 
       - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
       - install -Dm0644 share/applications/${FLATPAK_ID}.svg "${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
-      - install -Dm0644 share/metainfo/${FLATPAK_ID}.metainfo.xml "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml"
+      - install -Dm0644 share/metainfo/${FLATPAK_ID}.metainfo.xml.template "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml.template"
       - install -Dm0644 share/applications/${FLATPAK_ID}.desktop "${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop"
       - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
     sources:
       - type: git
         url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: fe5672ac8d2c2b61b55c8d60f7c2da99f42c8121
+        commit: bbdaf1e765c16df52901ddbef5ea3e118e862d24
       - type: script
         dest-filename: snis.sh
         commands:
