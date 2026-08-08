@@ -21,25 +21,31 @@
 		Jeremy Van Grinsven, Stephen M. Cameron
 */
 #if defined(INCLUDE_VS)
-	varying vec3 v_Position;
-	varying vec3 v_Normal;
-	varying vec3 v_TexCoord;
+	out vec3 v_Position;
+	out vec3 v_Normal;
+	out vec3 v_TexCoord;
 
 	#if defined(USE_NORMAL_MAP)
-	varying vec3 v_Tangent;
-	varying vec3 v_BiTangent;
-	varying mat3 tbn;
+	out vec3 v_Tangent;
+	out vec3 v_BiTangent;
+	out mat3 tbn;
 	#endif
 
 	uniform mat4 u_MVPMatrix;  // A constant representing the combined model/view/projection matrix.
 	uniform mat4 u_MVMatrix;   // A constant representing the combined model/view matrix.
 	uniform mat3 u_NormalMatrix;
 
-	attribute vec4 a_Position; // Per-vertex position information we will pass in.
-	attribute vec3 a_Normal;   // Per-vertex normal, tangent, and bitangent information we will pass in.
+#if defined(USE_CSM)
+	/* Also declared in the fragment stage, which lights with it; the vertex stage needs it
+	 * to work out how steeply the light strikes each vertex. */
+	uniform vec3 u_LightPos;
+#endif
+
+	in vec4 a_Position; // Per-vertex position information we will pass in.
+	in vec3 a_Normal;   // Per-vertex normal, tangent, and bitangent information we will pass in.
 #if defined(USE_NORMAL_MAP)
-	attribute vec3 a_Tangent;
-	attribute vec3 a_BiTangent;
+	in vec3 a_Tangent;
+	in vec3 a_BiTangent;
 #endif
 
 	void main()
@@ -57,6 +63,11 @@
 
 		v_TexCoord = a_Position.xyz;
 
+#if defined(USE_CSM)
+		csm_set_shadow_coords(a_Position, normalize(a_Normal),
+			csm_grazing(v_Normal, u_LightPos - v_Position));
+#endif
+
 		/* gl_Position is a special variable used to store the final position.
 		   Multiply the vertex by the matrix to get the final point in normalized screen coordinates. */
 		gl_Position = u_MVPMatrix * a_Position;
@@ -64,14 +75,14 @@
 #endif
 
 #if defined(INCLUDE_FS)
-	varying vec3 v_Position;
-	varying vec3 v_Normal;
-	varying vec3 v_TexCoord;
+	in vec3 v_Position;
+	in vec3 v_Normal;
+	in vec3 v_TexCoord;
 
 	#if defined(USE_NORMAL_MAP)
-	varying vec3 v_Tangent;
-	varying vec3 v_BiTangent;
-	varying mat3 tbn;
+	in vec3 v_Tangent;
+	in vec3 v_BiTangent;
+	in mat3 tbn;
 	#endif
 
 	uniform samplerCube u_AlbedoTex;
@@ -84,8 +95,25 @@
 #endif
 #if defined USE_SPECULAR
 	uniform vec3 u_WaterColor; // Color of water used in specular calculations
-	uniform vec3 u_SunColor; // Color of sun used in specular calculations
 #endif
+
+/* Star-coloured lighting.  u_LightColor is the star-tinted direct light and u_AmbientColor
+ * the complement-tinted shade, both from star_light_colors() by way of
+ * graph_dev_compute_star_light().  Planets went without these for as long as the mechanism
+ * existed: their diffuse term was a bare scalar, so a purple star lit its ships purple and
+ * its planets white.  The only colour that ever reached a planet was u_SunColor on the
+ * specular highlight, which was a second, hand-written statement of the star's colour that
+ * in several shipped systems disagreed with the star -- two of them had a warm star casting
+ * a blue-white glint.  So the specular now takes u_LightColor too and u_SunColor is gone. */
+uniform vec3 u_LightColor;
+uniform vec3 u_AmbientColor;
+
+/* Scale on the shaded-side floor.  Planets set this below 1; everything else on this shader
+ * leaves it at 1.  A planet is a large airless body and its night side genuinely goes nearly
+ * black, but u_AmbientColor is sized for hulls and asteroids, where the ambient floor is a
+ * legibility affordance rather than physics -- you have to be able to see the ship you are
+ * flying and the rock you are about to hit.  One uniform lets the same shader serve both. */
+uniform float u_AmbientScale;
 
 #if defined(USE_ANNULUS_SHADOW)
 	uniform sampler2D u_AnnulusAlbedoTex;
@@ -101,7 +129,7 @@
 		if (abs(denom) > 0.000001) {
 			vec3 plane_dir = plane_pos - ray_pos;
 			t = dot(plane_normal, plane_dir) / denom;
-			return t >= 0;
+			return t >= 0.0;
 		}
 		return false;
 	}
@@ -109,7 +137,7 @@
 	bool intersect_disc(vec3 disc_normal, vec3 disc_center, float r_squared, vec3 ray_pos,
 		vec3 ray_dir, out float dist2)
 	{
-		float t = 0;
+		float t = 0.0;
 		if (intersect_plane(disc_normal, disc_center, ray_pos, ray_dir, t)) {
 			vec3 plane_intersect = ray_pos + ray_dir * t;
 			vec3 v = plane_intersect - disc_center;
@@ -119,6 +147,8 @@
 		return false;
 	}
 #endif
+
+	out vec4 f_FragColor;
 
 	void main()
 	{
@@ -142,7 +172,7 @@
 				float u = (sqrt(intersect_r_squared) - ir) /
 						(u_AnnulusRadius.z - ir);
 
-				vec4 ring_color = u_AnnulusTintColor * texture2D(u_AnnulusAlbedoTex, vec2(u, u_ring_texture_v));
+				vec4 ring_color = u_AnnulusTintColor * texture(u_AnnulusAlbedoTex, vec2(u, u_ring_texture_v));
 
 				/* how much we will shadow based on transparancy, so 1.0=no shadow, 0.0=full */
 				shadow  = 1.0 - ring_color.a;
@@ -150,11 +180,26 @@
 		}
 #endif
 
+#if defined(USE_CSM)
+		/* Fold in the cascaded shadow map.  This multiplies rather than assigns because the
+		 * ring shadow above is a separate occluder: both are fractions of the light that
+		 * reaches this fragment, so they compose.  v_Position is eye-space, so the
+		 * view-space distance that selects the cascade is -z. */
+		int csm_cascade;
+		shadow *= csm_shadow_factor(csm_cascade, -v_Position.z);
+#endif
+
 #if defined(USE_NORMAL_MAP)
-		vec3 norm_sample = normalize(textureCube(u_NormalMapTex, v_TexCoord).xyz * 2.0 - 1.0);
+		vec3 norm_sample = normalize(texture(u_NormalMapTex, v_TexCoord).xyz * 2.0 - 1.0);
 		vec3 pixel_normal = tbn * norm_sample;
 		float normal_map_shadow = max(0.0, dot(pixel_normal, light_dir));
-		float diffuse = max(shadow * normal_map_shadow, u_Ambient);
+		/* A max, not a multiply: u_AmbientColor is the absolute shaded colour and
+		 * SUPERSEDES the scalar u_Ambient, exactly as textured-and-lit-per-pixel and
+		 * single-color-lit-per-vertex use it.  Multiplying the two instead lands the
+		 * shaded side at roughly ambient squared -- about ten times too dark, which
+		 * reads as pure black. */
+		vec3 diffuse = max(u_AmbientColor * u_AmbientScale,
+					u_LightColor * shadow * normal_map_shadow);
 
 		/* If the normal is straight up, and the color is mostly blue, consider it water,
 		 * which then has a specular component.
@@ -165,7 +210,7 @@
                 // blinn phong half vector specular
                 vec3 view_dir = normalize(-v_Position);
                 vec3 half_dir = normalize(light_dir + view_dir);
-                float n_dot_h = max(0, clamp(dot(v_Normal, half_dir), 0.0, 1.0));
+                float n_dot_h = max(0.0, clamp(dot(v_Normal, half_dir), 0.0, 1.0));
 #if defined(USE_SPECULAR)
 		float SpecularPower = 512.0;
 		float SpecularIntensity = 0.9;
@@ -187,29 +232,41 @@
 		 */
 		float reflectance = min(1.0, smoothstep(0.0, 0.8, 1.0 - direct) * 1.2 + 0.1);
 
-		vec3 specular_color = straight_up_normal * reflectance * u_SunColor * SpecularIntensity * spec;
+		vec3 specular_color = straight_up_normal * reflectance * u_LightColor * SpecularIntensity * spec;
 #endif
 #else
 		/* make diffuse light atleast ambient */
-		float diffuse = max(direct * shadow, u_Ambient);
+		vec3 diffuse = max(u_AmbientColor * u_AmbientScale,
+					u_LightColor * direct * shadow);
 #if defined(USE_SPECULAR)
 #endif
 #endif
 
 
-		gl_FragColor = textureCube(u_AlbedoTex, v_TexCoord);
+		f_FragColor = texture(u_AlbedoTex, v_TexCoord);
 #if defined(USE_SPECULAR)
 		vec3 white = vec3(1.0, 1.0, 1.0);
-		float not_clouds = 1.0 - smoothstep(0.8, 1.0, dot(gl_FragColor.rgb, white));
-		float mostly_blue = smoothstep(0.75, 0.8, dot(normalize(u_WaterColor), normalize(gl_FragColor.rgb)));
-		gl_FragColor.rgb += specular_color * mostly_blue * not_clouds;
+		float not_clouds = 1.0 - smoothstep(0.8, 1.0, dot(f_FragColor.rgb, white));
+		float mostly_blue = smoothstep(0.75, 0.8, dot(normalize(u_WaterColor), normalize(f_FragColor.rgb)));
 #endif
-		gl_FragColor.rgb *= diffuse;
+		/* Light the albedo first, THEN add the highlight.  The old order added the
+		 * specular and multiplied the sum by the diffuse term, which both scaled the
+		 * highlight by the star's colour a second time and extinguished it towards the
+		 * terminator -- exactly where a low sun over water should throw the strongest
+		 * glint. */
+		f_FragColor.rgb *= diffuse;
+#if defined(USE_SPECULAR)
+		f_FragColor.rgb += specular_color * mostly_blue * not_clouds;
+#endif
 
 		/* tint with alpha pre multiply */
-		gl_FragColor.rgb *= u_TintColor.rgb;
-		gl_FragColor *= u_TintColor.a;
-		gl_FragColor = filmic_tonemap(gl_FragColor);
+		f_FragColor.rgb *= u_TintColor.rgb;
+		f_FragColor *= u_TintColor.a;
+		f_FragColor = filmic_tonemap(f_FragColor);
+
+#if defined(USE_CSM)
+		f_FragColor = csm_debug_color(f_FragColor, csm_cascade, shadow);
+#endif
 	}
 #endif
 

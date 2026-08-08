@@ -8,12 +8,27 @@ uniform float u_in_shade;  // 1.0 means in full shade.  0.0 means not in shade.
 			   // e.g. a ship shaded by a planet
 uniform float u_Ambient;   // Ambient light, 0.1 is ok value
 
+/* Star-coloured lighting: white sunlight tinted toward the star's colour, and the absolute
+ * (complement-tinted) shaded colour that supersedes the scalar u_Ambient in the combine below.
+ * Renderer defaults (light = white, ambient = vec3(u_Ambient)) reproduce the untinted look. */
+uniform vec3 u_LightColor;
+uniform vec3 u_AmbientColor;
+
 uniform vec3 u_LightPos;   // The position of the light in eye space.
 
-attribute vec4 a_Position; // Per-vertex position information we will pass in.
-attribute vec3 a_Normal;   // Per-vertex normal information we will pass in.
+in vec4 a_Position; // Per-vertex position information we will pass in.
+in vec3 a_Normal;   // Per-vertex normal information we will pass in.
 
-varying vec3 v_Color;      // This will be passed into the fragment shader.
+out vec3 v_Color;      // This will be passed into the fragment shader.
+
+#ifdef USE_CSM
+uniform mat4 u_ShadowMVP[MAX_SHADOW_CASCADES];  // Maps model space to each cascade's clip space.
+uniform int u_NumCascades;
+out vec4 v_ShadowCoord[MAX_SHADOW_CASCADES];     // Fragment position in each cascade's clip space.
+out float v_LightLevel;    // Unshadowed diffuse light level.
+out vec3 v_BaseColor;      // Unlit object color.
+out float v_ViewDepth;     // Positive view-space distance, for cascade selection.
+#endif
 
 void main()                // The entry point for our vertex shader.
 {
@@ -28,16 +43,25 @@ void main()                // The entry point for our vertex shader.
 
 	// Calculate the dot product of the light vector and vertex normal. If the normal and light vector are
 	// pointing in the same direction then it will get max illumination.
-	float dot = (1 - u_in_shade) * dot(modelViewNormal, lightVector);
+	float dotV = (1.0 - u_in_shade) * dot(modelViewNormal, lightVector);
 
 	// mimic the original snis software render lighting
-	/* dot = (dot + 1.0) / 2.0; */
+	/* dotV = (dotV + 1.0) / 2.0; */
 
-	// ambient
-	float diffuse = max(dot, u_Ambient);
+	// Combine the star-tinted direct light with the absolute complement-tinted ambient,
+	// per channel (supersedes the old scalar max(dotV, u_Ambient)).
+	// It will be interpolated across the triangle.
+	v_Color = u_Color * max(u_AmbientColor, u_LightColor * max(dotV, 0.0));
 
-	// Multiply the color by the illumination level. It will be interpolated across the triangle.
-	v_Color = u_Color * diffuse;
+#ifdef USE_CSM
+	// Pass the raw lighting terms so the fragment shader can modulate the diffuse
+	// contribution by the per-fragment shadow factor.
+	v_LightLevel = dotV;
+	v_BaseColor = u_Color;
+	v_ViewDepth = -modelViewVertex.z;
+	for (int csm_i = 0; csm_i < u_NumCascades; csm_i++)
+		v_ShadowCoord[csm_i] = u_ShadowMVP[csm_i] * a_Position;
+#endif
 
 	// gl_Position is a special variable used to store the final position.
 	// Multiply the vertex by the matrix to get the final point in normalized screen coordinates.
