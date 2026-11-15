@@ -3,7 +3,7 @@
 This exists solely for: 
 
 - to host share folder files required in flatpak build as they are not hosted on official snis github
-- testing io.github.smcameron.space-nerds-in-space
+- possibly testing io.github.smcameron.space-nerds-in-space building
 
 Space Nerds in Space is a linux only space bridge simulator.
 
