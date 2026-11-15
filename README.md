@@ -1,8 +1,8 @@
 # Space Nerds in Space Flatpak
 
-This exists for 
+This exists solely for: 
 
-- share files hosted as they are not on official snis github
+- to host share folder files required in flatpak build as they are not hosted on official snis github
 - testing io.github.smcameron.space-nerds-in-space
 
 Space Nerds in Space is a linux only space bridge simulator.
