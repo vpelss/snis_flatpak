@@ -1,9 +1,11 @@
 # Space Nerds in Space Flatpak
 
-This exists solely for: 
+This repository exists solely for: 
 
 - to host share folder and patches folder files required in flatpak build as they are not hosted on official snis github
 - possibly testing io.github.smcameron.space-nerds-in-space building
+
+---------------------------------------------------
 
 Space Nerds in Space is a linux only space bridge simulator.
 
@@ -21,25 +23,6 @@ https://flathub.org/apps/io.github.smcameron.space-nerds-in-space
 
 ```
 flatpak install flathub io.github.smcameron.space-nerds-in-space
-flatpak run io.github.smcameron.space-nerds-in-space
-```
-
-# Install with flatpak manually
-
-If your distro does not already have flatpak installed, install flatpak for your linux distro as per: https://flatpak.org/setup/
-
-Then download the bundle: https://github.com/vpelss/snis_flatpak/releases/tag/Download
-
-Then Install from a terminal. (you may need to run prefix sudo)
-
-```
-flatpak install --user --bundle io.github.smcameron.space-nerds-in-space.x86_64
-
-```
-
-Then run it: 
-
-```
 flatpak run io.github.smcameron.space-nerds-in-space
 ```
 
