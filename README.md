@@ -1,5 +1,7 @@
 # Space Nerds in Space Flatpak
 
+For testing io.github.smcameron.space-nerds-in-space
+
 Space Nerds in Space is a linux only space bridge simulator.
 
 You can build it yourself on your distro here:
