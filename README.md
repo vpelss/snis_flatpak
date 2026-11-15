@@ -67,7 +67,7 @@ Arch WSL
 - sudo pacman -S xfce4 xfce4-goodies
 - sudo pacman -S sdl12-compat
 
-  Slackware (this is not going to happen. Too difficult to set up jack on slackware)
+Slackware (this is not going to happen. Too difficult to set up jack on slackware)
 
   - slackpkg update
   - sudo slackpkg install xorg-server
