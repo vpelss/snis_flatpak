@@ -15,7 +15,8 @@ planet texture: kolaron no-normal-map gas-giant
 atmosphere brightness: 0.5
 
 sun texture: sun.png
-skybox texture: skybox-
+# skybox texture: skybox-
+skybox texture: red-nebula-sky-
 star location: 7.2 10.0 -3.3
 
 # --- star rendering, fitted to sun.png ---

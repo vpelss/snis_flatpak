@@ -16,7 +16,7 @@ planet texture: vedekri no-normal-map gas-giant
 atmosphere_brightness: 0.5
 
 sun texture: sun.png
-skybox texture: violethaze
+skybox texture: golden-nebula-sky-
 star location: 6.0 -4.5 -4.1
 
 # --- star rendering, fitted to sun.png ---
