@@ -1,7 +1,7 @@
 id: io.github.smcameron.space-nerds-in-space
-runtime: org.freedesktop.Platform 
-runtime-version: "24.08"
-sdk: org.freedesktop.Sdk 
+runtime: org.freedesktop.Platform
+runtime-version: "25.08"
+sdk: org.freedesktop.Sdk
 command: snis.sh
 
 finish-args:
@@ -13,12 +13,12 @@ finish-args:
 
 cleanup:
   - '/patches'
- 
+
 modules:
 
-  # author prefers not to host asset binaries on git. So I host them. 
-  #This module removes the need to download many assets on the first run. 
-  - name: assets_not_hosted 
+  # author prefers not to host asset binaries on git. So I host them.
+  #This module removes the need to download many assets on the first run.
+  - name: assets_not_hosted
     buildsystem: simple
     build-commands:
       - cp -R share ${FLATPAK_DEST}/share
@@ -26,22 +26,24 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: 3bb2936da03097a5ef8769f1819d8cbe92f140f4
+        commit: 201934deb50ac3f3e2d1ddff61390e765c99b43a
 
   - name: portaudio
     buildsystem: cmake-ninja
-    build-commands: 
+    config-opts:
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     sources:
       - type: git
         url: https://github.com/PortAudio/portaudio.git
-        commit: 242a0241f69bd359b692004f3974ce39ec5137fd #Aug 11, 2021
+        tag: v19.7.0
+        commit: 147dd722548358763a8b649b3e4b41dfffbcfbb6
 
   - name: nanotts_pico2wav
     buildsystem: simple
-    build-commands: 
-      - patch svoxpico/picoapi.c  -i ${FLATPAK_DEST}/patches/picoapi_patch.txt 
+    build-commands:
+      - patch svoxpico/picoapi.c  -i ${FLATPAK_DEST}/patches/picoapi_patch.txt
       - mkdir -p ${FLATPAK_DEST}/bin/lang
-      - cd svoxpico; ./autogen.sh && ./configure --host `uname -m` && make -j 
+      - cd svoxpico; ./autogen.sh && ./configure --host `uname -m` && make -j
       - make
       -  install -Dm755 nanotts ${FLATPAK_DEST}/bin/nanotts
       - cp -R lang ${FLATPAK_DEST}/bin
@@ -52,22 +54,38 @@ modules:
 
   - shared-modules/lua5.3/lua-5.3.5.json
   - shared-modules/glu/glu-9.json
-  - shared-modules/glew/glew.json
+  #- shared-modules/glew/glew.json
 
   - name: snis
     buildsystem: simple
-    build-commands: 
-      - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
+    build-commands:
+      #- make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
+      - install -Dm755 snis_build.sh ${FLATPAK_DEST}/bin/snis_build.sh # x86_64 or aarch64 builds differ
+      - ${FLATPAK_DEST}/bin/snis_build.sh #make is handled in snis_build.sh
       - install -Dm0644 share/applications/${FLATPAK_ID}.svg "${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
       - install -Dm0644 share/metainfo/${FLATPAK_ID}.metainfo.xml.template "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml.template"
       - install -Dm0644 share/applications/${FLATPAK_ID}.desktop "${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop"
       - install -Dm755 snis.sh ${FLATPAK_DEST}/bin/snis.sh
     sources:
-      - type: git
-        url: https://github.com/smcameron/space-nerds-in-space.git
-        commit: bbdaf1e765c16df52901ddbef5ea3e118e862d24
       - type: script
         dest-filename: snis.sh
         commands:
           - cd /app/bin
           - exec ./snis_client --fullscreen --auto-download-assets
+      - type: script
+        dest-filename: snis_build.sh
+        commands:
+          - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes 
+        only-arches:
+          - x86_64
+      - type: script
+        dest-filename: snis_build.sh
+        commands:
+          - make install PREFIX=${FLATPAK_DEST} WITHVOICECHAT=yes USE_GLES=1
+        only-arches:
+          - aarch64
+      - type: git
+        url: https://github.com/smcameron/space-nerds-in-space.git
+        commit: 92b9af19765534ff6a652ed5465ca1e5e326e464
+
+
