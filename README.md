@@ -1,5 +1,5 @@
 # Space Nerds in Space Flatpak
-
+ 
 This repository exists solely for: 
 
 - to host 'share', 'screenshots' and 'patches' folder files required for the flatpak build as they are not hosted on official snis github
