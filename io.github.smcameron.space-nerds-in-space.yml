@@ -26,7 +26,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/vpelss/snis_flatpak.git
-        commit: 201934deb50ac3f3e2d1ddff61390e765c99b43a
+        commit: 62cd0bed1deba1a9bedefe19b07d01f3d2c1de29
 
   - name: portaudio
     buildsystem: cmake-ninja
